@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台本作成ちゃん | UGC動画CR検証台本ジェネレーター</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+  .container { max-width: 780px; margin: 0 auto; padding: 20px 16px 60px; }
+  .header { text-align: center; margin-bottom: 24px; }
+  .header-inner { display: inline-flex; align-items: center; gap: 12px; background: #fff; border-radius: 16px; padding: 16px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+  .header-icon { font-size: 28px; }
+  .header h1 { font-size: 22px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
+  .header p { font-size: 11px; color: #94a3b8; font-weight: 500; }
+  .card { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .card-step { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .step-num { width: 24px; height: 24px; background: #2563eb; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .card-step h2 { font-size: 14px; font-weight: 700; color: #334155; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .grid-4 { display: flex; gap: 8px; }
+  .grid-4 button { flex: 1; }
+  .sel-btn { padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; background: #fff; cursor: pointer; text-align: left; transition: all 0.15s; }
+  .sel-btn:hover { border-color: #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .sel-btn.active { border-color: #2563eb; background: #eff6ff; }
+  .sel-btn .name { font-size: 13px; font-weight: 700; color: #0f172a; }
+  .sel-btn .desc { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+  .sel-btn .emoji { font-size: 18px; margin-bottom: 4px; display: block; text-align: center; }
+  .sel-btn.center { text-align: center; }
+  .sel-btn.disabled { opacity: 0.4; cursor: not-allowed; border-style: dashed; }
+  .cnt-btn { padding: 8px; border-radius: 10px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; background: #f1f5f9; color: #475569; }
+  .cnt-btn.active { background: #2563eb; color: #fff; }
+  .toggle-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #2563eb; font-weight: 600; cursor: pointer; background: none; border: none; padding: 4px 0; }
+  .toggle-btn:hover { color: #1d4ed8; }
+  .toggle-btn.red { color: #ef4444; }
+  .toggle-content { background: #f8fafc; border-radius: 12px; padding: 12px; border: 1px solid #f1f5f9; margin-top: 6px; margin-bottom: 6px; max-height: 180px; overflow-y: auto; }
+  .toggle-content.red { background: #fef2f2; border-color: #fecaca; }
+  .toggle-content .item { font-size: 11px; color: #475569; padding: 2px 0; border-bottom: 1px solid #f1f5f9; }
+  .toggle-content .item:last-child { border: none; }
+  .toggle-content .regu-item { font-size: 11px; color: #dc2626; padding: 2px 0; }
+  .win-row { display: flex; gap: 8px; margin-bottom: 6px; font-size: 12px; }
+  .win-label { flex-shrink: 0; width: 40px; font-weight: 800; }
+  .win-label.fv { color: #2563eb; }
+  .win-label.hook { color: #d97706; }
+  .win-label.bn { color: #7c3aed; }
+  .win-label.cta { color: #64748b; }
+  .win-text { color: #334155; }
+  .win-text.muted { color: #94a3b8; font-size: 11px; }
+  textarea { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 13px; resize: none; height: 72px; font-family: inherit; }
+  textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  textarea::placeholder { color: #94a3b8; }
+  label { font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px; }
+  .api-row { display: flex; gap: 8px; }
+  .api-input { flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 13px; font-family: monospace; }
+  .api-input:focus { outline: none; border-color: #2563eb; }
+  .api-btn { padding: 8px 12px; border-radius: 10px; border: none; background: #f1f5f9; color: #475569; font-size: 12px; cursor: pointer; font-weight: 600; }
+  .api-status { font-size: 11px; color: #10b981; font-weight: 600; background: #ecfdf5; padding: 2px 8px; border-radius: 10px; }
+  .api-hint { font-size: 10px; color: #94a3b8; margin-top: 6px; }
+  .api-hint a { color: #2563eb; }
+  .gen-btn { width: 100%; padding: 16px; border-radius: 16px; border: none; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; background: linear-gradient(135deg, #2563eb, #4f46e5); color: #fff; margin-bottom: 24px; }
+  .gen-btn:hover { box-shadow: 0 8px 20px rgba(37,99,235,0.3); transform: translateY(-1px); }
+  .gen-btn:active { transform: scale(0.99); }
+  .gen-btn:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-shadow: none; transform: none; }
+  .gen-btn.loading { background: #e2e8f0; color: #64748b; cursor: wait; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid #94a3b8; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
+  .error { background: #fef2f2; border: 1px solid #fecaca; border-radius: 16px; padding: 14px; margin-bottom: 16px; color: #dc2626; font-size: 13px; font-weight: 500; }
+  .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .results-header h2 { font-size: 18px; font-weight: 900; color: #0f172a; }
+  .copy-btn { padding: 8px 16px; border-radius: 12px; border: none; background: #0f172a; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .copy-btn:hover { background: #334155; }
+  .copy-btn.copied { background: #10b981; }
+  .script-card { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .script-head { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; }
+  .script-id { padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 900; }
+  .script-id.fv { background: #dbeafe; color: #1d4ed8; }
+  .script-id.bn { background: #d1fae5; color: #047857; }
+  .script-cat { font-size: 13px; font-weight: 700; color: #0f172a; margin-left: 8px; }
+  .script-past { font-size: 10px; color: #6366f1; font-weight: 700; background: #eef2ff; padding: 2px 8px; border-radius: 10px; }
+  .script-body { padding: 16px 20px; }
+  .script-hypo { font-size: 11px; color: #94a3b8; font-style: italic; margin-bottom: 14px; }
+  .part { border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+  .part.variable { background: #fef2f2; border: 1px solid #fecaca; }
+  .part.fixed { background: #f8fafc; border: 1px solid #f1f5f9; }
+  .part-label { font-size: 10px; font-weight: 900; margin-bottom: 4px; }
+  .part-label.variable { color: #dc2626; }
+  .part-label.fixed { color: #94a3b8; }
+  .part-text { font-size: 13px; white-space: pre-wrap; }
+  .part-text.bold { font-weight: 800; color: #0f172a; }
+  .part-text.muted { color: #94a3b8; }
+  .part-text.small { font-size: 11px; color: #94a3b8; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .regu-line { margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; font-size: 11px; color: #10b981; font-weight: 600; }
+  .footer { text-align: center; font-size: 10px; color: #94a3b8; padding: 20px 0; }
+</style>
+</head>
+<body>
+<div class="container" id="app"></div>
+<script>
+const PRODUCTS={gungun:{name:"伸長ぐんぐん習慣",emoji:"🦴",category:"栄養機能食品（カルシウム・ビタミンD）",target:"小学生〜高校生の成長期の子を持つ30〜50代の母親",channels:"Meta（Instagram/Facebook）、TikTok、LINE",price:"初回480円（税込）/ 2回目以降 2袋9,720円（税込）60日サイクル / 4回定期縛り",keyFeatures:"無味無臭の粉末タイプ。料理に混ぜるだけ。カルシウム600mg/杯。小児科医監修。GMP認証国内工場。DNA核酸配合。累計600万食突破。元日本代表栗原恵さん推薦。",reguRules:["cm数値の使用NG","体格・骨格への直接言及NG","効果効能の断定NG（身長が伸びる、集中力UP、体力UP等）","「ぐんぐん伸びた※」「小さい※子」等、当たり台本の※付き表現が上限ライン","「成長に必要な栄養素が入った補助食品」の範囲で案内","新型栄養失調・具体的パーセンテージは医学的根拠が不明確な場合NG"],winningScript:{fv:"バスケやって小さい※子",hook:"おにぎりにこれこっそり混ぜてたら、別人かってぐらいぐんぐん伸びた※",benefit:"チームメンバーと比べてばっかだった子も自ら、自主練するようになって\nスーパーキッズが爆誕するんです",cta:"実はこれ、無味無臭だから 子供に内緒で成長期対策できると話題になってママ友の間で話題沸騰中!あの元日本代表、栗原恵さんもオススメしてて オリンピックに2度出場した累計600万食突破※している超人気アイテムなんです!スプーン1杯に成長期に必要な栄養素※が100%※入っててどんなご飯にも混ぜるから忙しいママにとってもおすすめ。短い成長期逃さないために今すぐチェックして"},winAnalysis:"1.スポーツ×体格差コンプレックスを直撃 2.無味無臭で子供にバレない 3.おにぎりという具体的使用シーン 4.権威性と実績で怪しさ払拭 5.情緒的ベネフィット＋焦燥感",pastFVs:["スポーツしてる小学生には","スポーツしてる小４息子には","スポーツ活躍したい小４息子には","伸び※悩んでる小4息子には","周りと比べる小4息子には","周りと差が出てきた小４息子には","周りより小さい※小４息子には","週末ベンチの小4息子には","バスケやって小さい※子","スポーツやってて小さい※子","春まで伸ばしたい※小4息子は","春までに伸ばしたい※小学生は","あとコップ5個分伸ばしたい※小学生は","バレーやってて小さい※子","サッカーやってて小さい※子","体操やってて小さい※子","野球やってて小さい※子","小さい※偏食息子には","妹より小さい※息子は","プロテイン続かない子供には","部活で勝てない小さい※子","10歳の息子には","小学生からぐんぐん伸ばしたい※なら","筋肉質で伸び※悩んでる小学生","10歳からぐんぐん伸ばしたい※なら","成長期スパート前の子供には","成長期に子どもをぐんぐん伸ばしたい※なら","子供伸ばして※活躍してほしいなら","筋肉質で伸びない※子","小さくて※すぐに諦める子どもには","毎日喧嘩してるわがまま小学生は","自己肯定感低いイヤイヤ小学生は","自信がないイヤイヤ小学生は","傷つきやすい小学生は","伸長ぐんぐん習慣買おうか迷ってる人絶対にみてください","子どものイヤイヤに悩んでる人、一回これ使ってください","ご機嫌切り替えパウダー","子どものイヤイヤにカルシウム、絶対やめてください","イヤイヤ小学生が劇的に変わります※","7〜9歳は中間反抗期の疑いがあるって知ってました？","子供の約7割が新型栄養失調って知ってました？","カルシウムって約3割しか吸収されないらしいんですよ","牛乳飲んでも半分以上のカルシウムは吸収されないって知ってました？","子供のゴールデンエイジは9歳から12歳の3年間って知ってました？","高校生からでも伸ばせる※って知ってた？","高校生からでも伸ばして※あげたいママ","息子にモテて欲しいママ","あとコップ5個分伸ばして※あげたいママ","最近かっこよくなったねって言われる息子","高校生までに子供をカッコよく育てたいなら","集合写真で隠れちゃう息子","いつまでも制服が似合わない息子","自信をもてない小学生","お片付けしない子供","喧嘩の多い小学生","スマホ中毒の小学生","お菓子中毒の小学生","ゲーム中毒の小学生"]}};
+const SYSTEM_PROMPT=`あなたはD2C商品のUGC動画広告の検証台本を設計する専門家「台本作成ちゃん」です。\n\n# 台本の構造（必ず従う）\n- FV（1行）: スクロールを止める一言。短いほど良い\n- フック（1〜2行）: 料理シーン＋変化の描写\n- ベネフィット（1行）: 感情の着地点。「〜するんです」「〜なんです」で終わる\n- 商品説明＋CTA: 当たり台本を固定使用\n\n# 検証設計ルール\n- 1台本1変数。FVテスト→FVだけ変える。BNテスト→BNだけ変える\n- 過去検証リストと被らない新しい訴求軸を優先\n- 各台本に検証仮説・過去検証との関係・レギュチェックを付ける\n\n# レギュルール（絶対遵守）\n- 効果効能の断定NG。cm数値NG。体格骨格の言及NG\n- 集中力・体力・運動能力への言及NG\n- 当たり台本の※付き表現が上限ライン\n\n# 出力形式\n純粋なJSONのみ出力。マークダウンのバッククォートや説明文は絶対に含めない。\n{"scripts":[{"id":"FV-1","type":"FV","category":"カテゴリ","fv":"FV","hook":"フック","benefit":"ベネフィット","cta":"CTA","hypothesis":"仮説","pastRelation":"過去検証との関係","reguCheck":"レギュOKの理由"}]}`;
+let state={product:null,testType:null,count:10,context:'',apiKey:localStorage.getItem('daihon_gemini_key')||'',loading:false,scripts:null,error:null,showWin:false,showPast:false,showRegu:false,copied:false};
+function setState(u){Object.assign(state,u);render();}
+async function generate(){if(!state.product||!state.testType||!state.apiKey){setState({error:state.apiKey?'商品と検証タイプを選択してください':'APIキーを入力してください'});return;}setState({loading:true,error:null,scripts:null});const p=PRODUCTS[state.product];const tt=state.testType;const prompt=`# 商品情報\n商品名: ${p.name} / カテゴリ: ${p.category} / ターゲット: ${p.target}\n配信面: ${p.channels} / 価格: ${p.price}\n特徴: ${p.keyFeatures}\n\n# レギュルール\n${p.reguRules.map((r,i)=>`${i+1}. ${r}`).join('\n')}\n\n# 当たり台本\nFV: ${p.winningScript.fv}\nフック: ${p.winningScript.hook}\nベネフィット: ${p.winningScript.benefit}\n商品説明+CTA: ${p.winningScript.cta}\n\n# 当たり分析\n${p.winAnalysis}\n\n# 過去検証済みFV（${p.pastFVs.length}本）\n${p.pastFVs.map((f,i)=>`${i+1}. ${f}`).join('\n')}\n\n# 依頼\n検証タイプ: ${tt==='fv'?'FVテスト（FVだけ変更）':tt==='bn'?'BNテスト（ベネフィットだけ変更）':'FV+BN両方テスト'}\n本数: ${state.count}本\n${state.context?`追加コンテキスト: ${state.context}`:''}\n\n${tt==='fv'?'FVだけ変え、フック・ベネフィット・CTAは当たり固定。':tt==='bn'?'ベネフィットだけ変え、FV・フック・CTAは当たり固定。':`前半${Math.ceil(state.count/2)}本FV、後半${Math.floor(state.count/2)}本BN。`}\n過去検証と被らない新しい切り口を提案してください。他社の子供向けサプリの広告トレンドも参考に。`;try{const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_instruction:{parts:[{text:SYSTEM_PROMPT}]},contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:1.0,maxOutputTokens:8000,responseMimeType:"application/json"}})});if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||`API error: ${res.status}`);}const data=await res.json();const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';const cleaned=text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();const match=cleaned.match(/\{[\s\S]*"scripts"[\s\S]*\}/);if(match){const parsed=JSON.parse(match[0]);setState({scripts:parsed.scripts,loading:false});}else{setState({error:'台本の解析に失敗。もう一度お試しください。',loading:false});}}catch(e){let msg=e.message;if(msg.includes('API_KEY_INVALID')||msg.includes('401'))msg='APIキーが無効です。正しいキーを入力してください。';setState({error:msg,loading:false});}}
+function copyAll(){if(!state.scripts)return;const p=PRODUCTS[state.product];let t=`=== ${p.name} 検証台本 ${state.scripts.length}本 ===\n\n`;state.scripts.forEach(s=>{t+=`━━━━━━━━━━━━━━━━━━━━\n【${s.id}】${s.category}\n検証仮説: ${s.hypothesis}\n過去検証: ${s.pastRelation}\n────────────────\n`;t+=`[FV] ${s.fv}${s.type==='FV'?' ← 検証変数':' （固定）'}\n\n`;t+=`[フック] ${s.hook} （固定）\n\n`;t+=`[ベネフィット]\n${s.benefit}${s.type==='BN'?' ← 検証変数':' （固定）'}\n\n`;t+=`[商品説明+CTA]\n${s.cta} （固定）\n\n`;t+=`[レギュ] ${s.reguCheck}\n━━━━━━━━━━━━━━━━━━━━\n\n`;});navigator.clipboard.writeText(t).then(()=>{setState({copied:true});setTimeout(()=>setState({copied:false}),2000);});}
+function render(){const s=state;const p=s.product?PRODUCTS[s.product]:null;const hasStep1=!!s.product;const hasStep2=!!s.testType;let html='';html+=`<div class="header"><div class="header-inner"><span class="header-icon">📝</span><div><h1>台本作成ちゃん</h1><p>UGC動画CR 検証台本ジェネレーター</p></div></div></div>`;html+=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="display:flex;align-items:center;gap:6px"><span>🔑</span><span style="font-size:13px;font-weight:700;color:#334155">Gemini APIキー</span></div>${s.apiKey?'<span class="api-status">✓ 設定済み</span>':''}</div><div class="api-row"><input class="api-input" type="password" id="apiInput" value="${s.apiKey}" placeholder="AIza..." oninput="let v=this.value;state.apiKey=v;localStorage.setItem('daihon_gemini_key',v)"><button class="api-btn" onclick="let i=document.getElementById('apiInput');i.type=i.type==='password'?'text':'password'">表示</button></div><p class="api-hint">取得方法: <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a> → 「APIキーを作成」→ コピー（無料・クレカ不要）</p></div>`;html+=`<div class="card"><div class="card-step"><span class="step-num">1</span><h2>商品を選択</h2></div><div class="grid-2">`;Object.entries(PRODUCTS).forEach(([k,v])=>{html+=`<button class="sel-btn${s.product===k?' active':''}" onclick="setState({product:'${k}',scripts:null,showWin:false,showPast:false,showRegu:false})"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">${v.emoji}</span><div><div class="name">${v.name}</div><div class="desc">${v.category}</div></div></div></button>`;});html+=`<button class="sel-btn disabled"><div class="desc" style="text-align:center;padding:8px">+ 商品追加（準備中）</div></button></div>`;if(p){html+=`<div style="margin-top:12px">`;html+=`<button class="toggle-btn" onclick="setState({showWin:!state.showWin})"><span style="font-size:10px">${s.showWin?'▼':'▶'}</span> 当たり台本</button>`;if(s.showWin){html+=`<div class="toggle-content"><div class="win-row"><span class="win-label fv">FV</span><span class="win-text">${p.winningScript.fv}</span></div><div class="win-row"><span class="win-label hook">フック</span><span class="win-text">${p.winningScript.hook}</span></div><div class="win-row"><span class="win-label bn">BN</span><span class="win-text">${p.winningScript.benefit.replace(/\n/g,'<br>')}</span></div><div class="win-row"><span class="win-label cta">CTA</span><span class="win-text muted">${p.winningScript.cta}</span></div></div>`;}html+=`<button class="toggle-btn" onclick="setState({showPast:!state.showPast})"><span style="font-size:10px">${s.showPast?'▼':'▶'}</span> 過去検証FV（${p.pastFVs.length}本）</button>`;if(s.showPast){html+=`<div class="toggle-content">${p.pastFVs.map((f,i)=>`<div class="item">${i+1}. ${f}</div>`).join('')}</div>`;}html+=`<button class="toggle-btn red" onclick="setState({showRegu:!state.showRegu})"><span style="font-size:10px">${s.showRegu?'▼':'▶'}</span> レギュルール</button>`;if(s.showRegu){html+=`<div class="toggle-content red">${p.reguRules.map(r=>`<div class="regu-item">⚠ ${r}</div>`).join('')}</div>`;}html+=`</div>`;}html+=`</div>`;if(hasStep1){html+=`<div class="card"><div class="card-step"><span class="step-num">2</span><h2>検証タイプを選択</h2></div><div class="grid-3">`;[{k:'fv',l:'FVテスト',d:'FVだけ変える',e:'🎯'},{k:'bn',l:'BNテスト',d:'ベネフィットだけ変える',e:'💡'},{k:'both',l:'両方テスト',d:'FV＋ベネフィット',e:'🔄'}].forEach(t=>{html+=`<button class="sel-btn center${s.testType===t.k?' active':''}" onclick="setState({testType:'${t.k}',scripts:null})"><span class="emoji">${t.e}</span><div class="name">${t.l}</div><div class="desc">${t.d}</div></button>`;});html+=`</div></div>`;}if(hasStep1&&hasStep2){html+=`<div class="card"><div class="card-step"><span class="step-num">3</span><h2>オプション設定</h2></div><label>生成本数</label><div class="grid-4">${[5,10,15,20].map(n=>`<button class="cnt-btn${s.count===n?' active':''}" onclick="setState({count:${n}})">${n}本</button>`).join('')}</div><div style="margin-top:14px"><label>追加コンテキスト（任意）</label><textarea id="ctxInput" placeholder="例：最近ママ目線のFVが好調。深掘りしたい / 前回FV-3が勝った" oninput="state.context=this.value">${s.context}</textarea></div></div>`;const canGen=s.apiKey&&!s.loading;html+=`<button class="gen-btn${s.loading?' loading':''}" ${canGen?`onclick="generate()"`:' disabled'}>${s.loading?'<span class="spinner"></span>生成中...（30秒〜1分）':!s.apiKey?'APIキーを入力してください':`台本を生成する（${s.count}本）`}</button>`;}if(s.error)html+=`<div class="error">${s.error}</div>`;if(s.scripts){html+=`<div class="results-header"><h2>📋 生成結果（${s.scripts.length}本）</h2><button class="copy-btn${s.copied?' copied':''}" onclick="copyAll()">${s.copied?'✓ コピー完了':'📋 全文コピー'}</button></div>`;s.scripts.forEach(sc=>{const isFV=sc.type==='FV';html+=`<div class="script-card"><div class="script-head"><div style="display:flex;align-items:center"><span class="script-id ${isFV?'fv':'bn'}">${sc.id}</span><span class="script-cat">${sc.category}</span></div><span class="script-past">${sc.pastRelation}</span></div><div class="script-body"><div class="script-hypo">💭 ${sc.hypothesis}</div><div class="part ${isFV?'variable':'fixed'}"><div class="part-label ${isFV?'variable':'fixed'}">FV ${isFV?'← 検証変数':'（固定）'}</div><div class="part-text ${isFV?'bold':'muted'}">${sc.fv}</div></div><div class="part fixed"><div class="part-label fixed">フック（固定）</div><div class="part-text muted">${sc.hook}</div></div><div class="part ${!isFV&&sc.type==='BN'?'variable':'fixed'}"><div class="part-label ${!isFV&&sc.type==='BN'?'variable':'fixed'}">ベネフィット ${!isFV&&sc.type==='BN'?'← 検証変数':'（固定）'}</div><div class="part-text ${!isFV&&sc.type==='BN'?'bold':'muted'}">${(sc.benefit||'').replace(/\n/g,'<br>')}</div></div><div class="part fixed"><div class="part-label fixed">商品説明+CTA（固定）</div><div class="part-text small">${sc.cta}</div></div><div class="regu-line">✓ レギュ：${sc.reguCheck}</div></div></div>`;});}html+=`<div class="footer">台本作成ちゃん v1.0 | 株式会社ヨミテ CR検証フレームワーク</div>`;document.getElementById('app').innerHTML=html;}
+render();
+</script>
+</body>
+</html>
